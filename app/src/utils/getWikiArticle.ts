@@ -1,6 +1,6 @@
 type Langs = "en" | "es";
 // https://en.wikipedia.org/api/rest_v1/page/random/html
-function urlBuilder(lang: Langs = "en") {
+function urlBuilder(lang: string = "en") {
   return `https://${lang}.wikipedia.org/api/rest_v1/page/random/html`;
 }
 
@@ -10,27 +10,35 @@ async function wikiArticleResolver(url: string = "") {
 }
 
 function wikiArticleCleaner(content: string): string {
+  const data = content;
   const parser = new DOMParser();
-  const doc = parser.parseFromString(content, "text/html");
+  const htmlDocument = parser.parseFromString(data, "text/html");
 
-  const unwantedSelectors = ["table", "img", "div", "span", "sup", "a"];
-  unwantedSelectors.forEach((selector) => {
-    const elements = doc.querySelectorAll(selector);
-    elements.forEach((el) => el.remove());
+  const unwantedElements = [
+    "img",
+    "table",
+    "style",
+    "script",
+    "noscript",
+    "svg",
+    "math",
+  ];
+  unwantedElements.forEach((tagName) => {
+    const elements = htmlDocument.getElementsByTagName(tagName);
+    for (let i = elements.length - 1; i >= 0; i--) {
+      elements[i]?.parentNode?.removeChild(elements[i]);
+    }
   });
 
-  let textContent = "";
-  const mainContent = doc.getElementById("content");
-  if (mainContent) {
-    textContent = mainContent?.textContent?.trim() || "";
-  }
+  const textContent = htmlDocument.body.textContent || "";
 
   return textContent;
 }
 
-async function getWikiArticle(lang: Langs = "en") {
+async function getWikiArticle(lang: string = "en") {
   const selectedUrl = urlBuilder(lang);
   const rawArticle = await wikiArticleResolver(selectedUrl);
+  console.log(rawArticle);
   const cleanArticle = wikiArticleCleaner(rawArticle);
   return cleanArticle;
 }

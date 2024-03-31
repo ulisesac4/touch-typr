@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import LanguageOptions from "../utils/languageOptions";
+import getWikiArticle from "../utils/getWikiArticle";
 
 export default function LanguageSelector() {
   const [selectedLanguage, setSelectedLanguage] = useState(LanguageOptions[0]);
@@ -17,8 +18,10 @@ export default function LanguageSelector() {
           return (
             <li
               key={index}
-              onClick={() => {
+              onClick={async () => {
                 setSelectedLanguage(value);
+                const content = await getWikiArticle(value);
+                console.log("le content", content);
               }}
             >
               <a>{value}</a>
