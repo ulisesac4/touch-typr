@@ -31,8 +31,11 @@ function wikiArticleCleaner(content: string): string {
   });
 
   const textContent = htmlDocument.body.textContent || "";
+  let text = textContent.replace(/\[\d+\]/g, "");
 
-  return textContent;
+  text = text.replace(/[^a-zA-Z0-9\s]/g, "");
+
+  return text;
 }
 
 async function getWikiArticle(lang: string = "en") {
